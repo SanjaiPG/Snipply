@@ -1,52 +1,136 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Script from "next/script";
 
-const PDFViewer = () => {
+export default function PDFAnalyzer() {
+    const [selectedPDF, setSelectedPDF] = useState({
+        name: "Bodea Brochure.pdf",
+        url: "https://acrobatservices.adobe.com/view-sdk-demo/PDFs/Bodea%20Brochure.pdf"
+    });
+
     useEffect(() => {
         const interval = setInterval(() => {
             if (window.AdobeDC) {
                 clearInterval(interval);
-
                 const adobeClientId = process.env.NEXT_PUBLIC_PDF_EMBED_API_KEY;
                 const adobeDCView = new window.AdobeDC.View({
                     clientId: adobeClientId,
-                    divId: "adobe-dc-view",
+                    divId: "pdf-preview",
                 });
 
                 adobeDCView.previewFile(
                     {
-                        content: {
-                            location: {
-                                url: "https://acrobatservices.adobe.com/view-sdk-demo/PDFs/Bodea Brochure.pdf",
-                            },
-                        },
-                        metaData: { fileName: "Bodea Brochure.pdf" },
+                        content: { location: { url: selectedPDF.url } },
+                        metaData: { fileName: selectedPDF.name },
                     },
                     { embedMode: "SIZED_CONTAINER" }
                 );
             }
-        }, 100);
-
+        }, 200);
         return () => clearInterval(interval);
-    }, []);
+    }, [selectedPDF]);
+
+    const pdfFiles = [
+        { name: "Bodea Brochure.pdf", url: "https://acrobatservices.adobe.com/view-sdk-demo/PDFs/Bodea%20Brochure.pdf" },
+        { name: "Annual Report.pdf", url: "https://acrobatservices.adobe.com/view-sdk-demo/PDFs/Adobe%20Annual%20Report.pdf" },
+        { name: "Marketing Plan.pdf", url: "https://acrobatservices.adobe.com/view-sdk-demo/PDFs/Marketing%20Brochure.pdf" }
+    ];
 
     return (
-        <>
-            {/* Load Adobe Embed SDK */}
-            <Script
-                src="https://acrobatservices.adobe.com/view-sdk/viewer.js"
-                strategy="beforeInteractive"
-            />
+        <div style={{ display: "flex", minHeight: "100vh", fontFamily: "Arial, sans-serif" }}>
+            <Script src="https://acrobatservices.adobe.com/view-sdk/viewer.js" strategy="beforeInteractive" />
 
-            {/* PDF container */}
-            <div
-                id="adobe-dc-view"
-                style={{ height: "360px", width: "500px", border: "1px solid #ccc" }}
-            />
-        </>
+            {/* LEFT COLUMN */}
+            <div style={{ flex: "0 0 20%", borderRight: "1px solid #ddd", padding: "1rem" }}>
+                <h2 style={{ marginBottom: "1rem" }}>PDF's</h2>
+                <input
+                    type="text"
+                    placeholder="Search"
+                    style={{
+                        width: "100%",
+                        padding: "0.5rem",
+                        marginBottom: "1rem",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px"
+                    }}
+                />
+                {pdfFiles.map((pdf, idx) => (
+                    <div
+                        key={idx}
+                        style={{
+                            padding: "0.5rem",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            backgroundColor: selectedPDF.name === pdf.name ? "#f5f5f5" : "transparent",
+                            marginBottom: "0.5rem"
+                        }}
+                        onClick={() => setSelectedPDF(pdf)}
+                    >
+                        <div style={{ fontWeight: "bold", fontSize: "0.9rem" }}>{pdf.name.split(".")[0]}</div>
+                        <div style={{ fontSize: "0.8rem", color: "#555" }}>{pdf.name}</div>
+                    </div>
+                ))}
+            </div>
+
+            {/* CENTER COLUMN */}
+            <div style={{ flex: 1, padding: "1rem" }}>
+                <h3 style={{ marginBottom: "1rem" }}>PDF Preview</h3>
+                <div
+                    id="pdf-preview"
+                    style={{
+                        height: "80vh",
+                        border: "1px solid #ccc",
+                        borderRadius: "6px",
+                        overflow: "hidden"
+                    }}
+                />
+            </div>
+
+            {/* RIGHT COLUMN */}
+            <div style={{
+                flex: "0 0 25%",
+                borderLeft: "1px solid #ddd",
+                padding: "1rem",
+                display: "flex",
+                flexDirection: "column"
+            }}>
+                <h3 style={{ marginBottom: "0.5rem" }}>AI Insights</h3>
+                <p style={{ fontSize: "0.9rem", marginBottom: "1rem" }}>
+                    AI-generated insights based on selected text
+                </p>
+                <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: "#fdecec",
+                    borderRadius: "8px",
+                    padding: "0.8rem"
+                }}>
+                    <div style={{
+                        width: "40px",
+                        height: "40px",
+                        background: "#ddd",
+                        borderRadius: "4px",
+                        marginRight: "0.8rem"
+                    }} />
+                    <div>
+                        <div style={{ fontWeight: "bold" }}>Podcast Episode Title</div>
+                        <div style={{ fontSize: "0.8rem", color: "#555" }}>Podcast Name</div>
+                    </div>
+                    <button style={{
+                        marginLeft: "auto",
+                        background: "red",
+                        border: "none",
+                        color: "white",
+                        borderRadius: "50%",
+                        width: "35px",
+                        height: "35px",
+                        cursor: "pointer"
+                    }}>
+                        ▶
+                    </button>
+                </div>
+            </div>
+        </div>
     );
-};
-
-export default PDFViewer;
+}
