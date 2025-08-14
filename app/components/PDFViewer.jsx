@@ -9,39 +9,55 @@ export default function PDFAnalyzer() {
         url: "https://acrobatservices.adobe.com/view-sdk-demo/PDFs/Bodea%20Brochure.pdf"
     });
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (window.AdobeDC) {
-                clearInterval(interval);
-                const adobeClientId = process.env.NEXT_PUBLIC_PDF_EMBED_API_KEY;
-                const adobeDCView = new window.AdobeDC.View({
-                    clientId: adobeClientId,
-                    divId: "pdf-preview",
-                });
-
-                adobeDCView.previewFile(
-                    {
-                        content: { location: { url: selectedPDF.url } },
-                        metaData: { fileName: selectedPDF.name },
-                    },
-                    { embedMode: "SIZED_CONTAINER" }
-                );
-            }
-        }, 200);
-        return () => clearInterval(interval);
-    }, [selectedPDF]);
-
     const pdfFiles = [
         { name: "Bodea Brochure.pdf", url: "https://acrobatservices.adobe.com/view-sdk-demo/PDFs/Bodea%20Brochure.pdf" },
         { name: "Annual Report.pdf", url: "https://acrobatservices.adobe.com/view-sdk-demo/PDFs/Adobe%20Annual%20Report.pdf" },
         { name: "Marketing Plan.pdf", url: "https://acrobatservices.adobe.com/view-sdk-demo/PDFs/Marketing%20Brochure.pdf" }
     ];
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (window.AdobeDC) {
+                clearInterval(interval);
+
+                const adobeClientId = process.env.NEXT_PUBLIC_PDF_EMBED_API_KEY;
+                if (!adobeClientId) {
+                    console.error("❌ Missing Adobe PDF Embed API key (NEXT_PUBLIC_PDF_EMBED_API_KEY)");
+                    return;
+                }
+
+                try {
+                    const adobeDCView = new window.AdobeDC.View({
+                        clientId: adobeClientId,
+                        divId: "pdf-preview",
+                    });
+
+                    adobeDCView.previewFile(
+                        {
+                            content: { location: { url: selectedPDF.url } },
+                            metaData: { fileName: selectedPDF.name },
+                        },
+                        { embedMode: "SIZED_CONTAINER" }
+                    );
+                } catch (err) {
+                    console.error("❌ Adobe PDF Embed error:", err);
+                    try {
+                        console.log("Error details:", JSON.stringify(err, null, 2));
+                    } catch {
+                        console.log("Error object could not be stringified");
+                    }
+                }
+            }
+        }, 200);
+
+        return () => clearInterval(interval);
+    }, [selectedPDF]);
+
     return (
         <div style={{ display: "flex", minHeight: "100vh", fontFamily: "Arial, sans-serif" }}>
             <Script src="https://acrobatservices.adobe.com/view-sdk/viewer.js" strategy="beforeInteractive" />
 
-            {/* LEFT COLUMN - PDF Titles */}
+            {/* LEFT COLUMN */}
             <div style={{ flex: "0 0 20%", borderRight: "1px solid #ddd", padding: "1rem" }}>
                 <h2 style={{ marginBottom: "1rem" }}>PDF's</h2>
                 {pdfFiles.map((pdf, idx) => (
@@ -62,9 +78,9 @@ export default function PDFAnalyzer() {
                 ))}
             </div>
 
-            {/* CENTER COLUMN - Search, Upload, Thumbnails, PDF Viewer */}
+            {/* CENTER COLUMN */}
             <div style={{ flex: 1, padding: "1rem", display: "flex", flexDirection: "column" }}>
-                {/* Search + Upload Bar */}
+                {/* Search */}
                 <div style={{ display: "flex", marginBottom: "1rem", gap: "0.5rem" }}>
                     <input
                         type="text"
@@ -77,7 +93,6 @@ export default function PDFAnalyzer() {
                             background: "#ffecec"
                         }}
                     />
-                    
                 </div>
 
                 {/* Thumbnails */}
@@ -117,7 +132,7 @@ export default function PDFAnalyzer() {
                 />
             </div>
 
-            {/* RIGHT COLUMN - AI Insights */}
+            {/* RIGHT COLUMN */}
             <div style={{
                 flex: "0 0 25%",
                 borderLeft: "1px solid #ddd",
@@ -126,25 +141,23 @@ export default function PDFAnalyzer() {
                 flexDirection: "column"
             }}>
                 <button
-                style={{
-                    background: "red",
-                    // alignItems: "center",
-                    marginLeft:350,
-                    width: 70,
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    padding: "0.5rem 1rem",
-                    cursor: "pointer"
-                }}
-            >
-                        Upload
-                    </button>
+                    style={{
+                        background: "red",
+                        marginLeft: 350,
+                        width: 70,
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "0.5rem 1rem",
+                        cursor: "pointer"
+                    }}
+                >
+                    Upload
+                </button>
                 <h3 style={{ marginBottom: "0.5rem" }}>AI Insights</h3>
                 <p style={{ fontSize: "0.9rem", marginBottom: "1rem" }}>
                     AI-generated insights based on selected text
                 </p>
-                
                 <div style={{
                     display: "flex",
                     alignItems: "center",
