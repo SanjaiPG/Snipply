@@ -13,7 +13,7 @@
 .toolbar {
     width: 100%;
     height: 40px;
-    background-color: #e5e7eb;
+    /* background-color: #e5e7eb; */
     border-radius: 10px;
     margin-bottom: 20px;
     display: flex;
@@ -48,8 +48,8 @@
     width: 100%;
     height: calc(100% - 80px);
     /* Account for toolbar and margin */
-    background-color: white;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* background-color: white; */
+    /* box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); */
     border-radius: 8px;
     overflow: hidden;
     position: relative;
