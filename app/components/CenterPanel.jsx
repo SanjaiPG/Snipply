@@ -1,234 +1,123 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useCallback } from "react";
-import { useAppState, useAppActions } from "./AppStateContext";
+import React, { useEffect, useRef } from 'react';
+import { useAppState } from './AppStateContext';
+import './CenterPanel.css';
 
-export default function CenterPanel() {
-    /* --------------------------------------------------------------------- */
-    /* ░░░  GLOBAL STATE  ░░░ */
-    const { files, currentPdfId, loading, errors } = useAppState();
-    const {
-        setLoading,
-        setError,
-        clearError,
-        setSnippets
-    } = useAppActions();
+const CenterPanel = () => {
+    const { files, currentPdfId } = useAppState();
+    const viewerRef = useRef(null);
+    const adobeDCViewRef = useRef(null);
 
-    /* --------------------------------------------------------------------- */
-    /* ░░░  REFS & STATE  ░░░ */
-    const viewerDivRef = useRef(null);   // <div id="pdf-viewer">
-    const adobeViewerRef = useRef(null);   // AdobeDC.View instance
-    const scriptLoadedRef = useRef(false);  // PDF Embed SDK loaded?
-    const previewReadyRef = useRef(null);   // Promise that resolves after previewFile
-    const [clientId, setClientId] = useState(null);
+    // Get current file data
+    const currentFile = currentPdfId ? files.get(currentPdfId) : null;
 
-    const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
-
-    /* --------------------------------------------------------------------- */
-    /* ░░░  HELPERS  ░░░ */
-
-    /* Load Adobe PDF Embed SDK exactly once */
-    const loadSdk = useCallback(() => new Promise((res, rej) => {
-        if (scriptLoadedRef.current || window.AdobeDC) return res();
-        const script = document.createElement("script");
-        script.id = "adobe-dc-sdk";
-        script.src = "https://documentservices.adobe.com/view-sdk/main.js";
-        script.onload = () => { scriptLoadedRef.current = true; res(); };
-        script.onerror = () => rej(new Error("Adobe PDF SDK failed to load"));
-        document.head.appendChild(script);
-    }), []);
-
-    /* Fetch clientId from backend route */
-    const fetchClientId = useCallback(async () => {
-        if (clientId) return clientId;
-        const r = await fetch("/api/config/adobe");
-        if (!r.ok) throw new Error("Unable to fetch Adobe client ID");
-        const { clientId: id } = await r.json();
-        setClientId(id);
-        return id;
-    }, [clientId]);
-
-    /* Create / re-create viewer and preview file */
-    const initViewer = useCallback(async file => {
-        setLoading("viewer", true); clearError("viewer");
-        try {
-            await loadSdk();                      // ① ensure SDK script
-            const id = await fetchClientId();     // ② ensure clientId
-
-            /* Destroy any previous viewer */
-            if (adobeViewerRef.current) viewerDivRef.current.innerHTML = "";
-
-            /* New viewer instance */
-            const viewer = new window.AdobeDC.View({
-                clientId: id,
-                divId: "pdf-viewer-container"
-            });
-            adobeViewerRef.current = viewer;
-
-            /* Preview-options (NO linearization) */
-            const cfg = {
-                embedMode: "SIZED_CONTAINER",
-                defaultViewMode: "FIT_WIDTH",
-                showPrintPDF: false,
-                showDownloadPDF: false,
-                showLeftHandPanel: false,
-                showAnnotationTools: false
-            };
-
-            /* Build content object */
-            let content;
-            if (file.file) {
-                /* Local File -> use arrayBuffer promise */
-                content = {
-                    promise: file.file.arrayBuffer(),
-                    metaData: { fileName: file.name }
-                };
-            } else if (file.url) {
-                content = {
-                    location: { url: file.url },
-                    metaData: { fileName: file.name }
-                };
-            } else {
-                throw new Error("No file data supplied");
-            }
-
-            /* Preview the PDF */
-            previewReadyRef.current =
-                await viewer.previewFile({ content, metaData: content.metaData }, cfg);
-
-            /* Register selection callback ONCE per preview */
-            viewer.registerCallback(
-                window.AdobeDC.View.Enum.CallbackType.EVENT_LISTENER,
-                async ev => {
-                    if (ev.type !== "PREVIEW_SELECTION_END") return;
-                    const text = ev.data?.selectedText?.trim();
-                    if (!text) return;
-                    handleSelection(text);
-                },
-                {
-                    enableFilePreviewEvents: true,
-                    listenOn: [window.AdobeDC.View.Enum.FilePreviewEvents.PREVIEW_SELECTION_END]
-                }
-            );
-
-            setLoading("viewer", false);
-        } catch (e) {
-            console.error(e);
-            setError("viewer", e.message);
-            setLoading("viewer", false);
-        }
-    }, [loadSdk, fetchClientId, setError, setLoading]);
-
-    /* --------------------------------------------------------------------- */
-    /* ░░░  TEXT-SELECTION HANDLER  ░░░ */
-    const handleSelection = async text => {
-        setLoading("snippets", true); clearError("snippets");
-        try {
-            if (USE_MOCK) {
-                /* --- MOCK PAYLOAD --- */
-                setSnippets([
-                    { id: "1", heading: "Mock Section", snippet: text, page: 1, pdfId: currentPdfId }
-                ]);
-            } else {
-                const r = await fetch("/api/semantic/related", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text, currentPdfId })
-                });
-                if (!r.ok) throw new Error("Backend error");
-                const { snippets } = await r.json();
-                setSnippets(snippets || []);
-            }
-        } catch (e) {
-            setError("snippets", e.message);
-        } finally {
-            setLoading("snippets", false);
-        }
-    };
-
-    /* --------------------------------------------------------------------- */
-    /* ░░░  EFFECTS  ░░░ */
-    /* Re-init when currentPdfId changes */
     useEffect(() => {
-        if (!currentPdfId || !files.has(currentPdfId)) return;
-        initViewer(files.get(currentPdfId));
-    }, [currentPdfId, files, initViewer]);
+        // Load Adobe DC View SDK if not already loaded
+        const loadAdobeSDK = () => {
+            return new Promise((resolve) => {
+                if (window.AdobeDC) {
+                    resolve();
+                    return;
+                }
 
-    /* Cleanup on unmount */
-    useEffect(() => () => {
-        if (viewerDivRef.current) viewerDivRef.current.innerHTML = "";
-        adobeViewerRef.current = null;
-    }, []);
+                const script = document.createElement('script');
+                script.src = 'https://acrobatservices.adobe.com/view-sdk/viewer.js';
+                script.onload = () => {
+                    document.addEventListener('adobe_dc_view_sdk.ready', resolve);
+                };
+                document.head.appendChild(script);
+            });
+        };
 
-    /* --------------------------------------------------------------------- */
-    /* ░░░  RENDER  ░░░ */
+        const displayPDF = async () => {
+            if (!currentFile || !viewerRef.current) return;
+
+            try {
+                await loadAdobeSDK();
+
+                // Clear previous viewer instance
+                if (adobeDCViewRef.current) {
+                    viewerRef.current.innerHTML = '';
+                    adobeDCViewRef.current = null;
+                }
+
+                // Create new viewer div
+                const viewerDiv = document.createElement('div');
+                viewerDiv.id = `adobe-dc-view-${currentPdfId}`;
+                viewerDiv.style.height = '100%';
+                viewerDiv.style.width = '100%';
+                viewerRef.current.appendChild(viewerDiv);
+
+                // Convert file to base64 or blob URL
+                const fileUrl = URL.createObjectURL(currentFile.file);
+
+                // Initialize Adobe DC View
+                adobeDCViewRef.current = new window.AdobeDC.View({
+                    clientId: process.env.NEXT_PUBLIC_PDF_EMBED_API_KEY, // Replace with your actual client ID
+                    divId: viewerDiv.id
+                });
+
+                // Preview the file
+                adobeDCViewRef.current.previewFile({
+                    content: { location: { url: fileUrl } },
+                    metaData: { fileName: currentFile.name }
+                }, {
+                    embedMode: "SIZED_CONTAINER",
+                    showDownloadPDF: true,
+                    showPrintPDF: true,
+                    showLeftHandPanel: true,
+                    showAnnotationTools: false
+                });
+
+            } catch (error) {
+                console.error('Error displaying PDF:', error);
+            }
+        };
+
+        displayPDF();
+
+        // Cleanup function
+        return () => {
+            if (adobeDCViewRef.current && viewerRef.current) {
+                viewerRef.current.innerHTML = '';
+                adobeDCViewRef.current = null;
+            }
+        };
+    }, [currentFile, currentPdfId]);
+
     return (
         <div className="center-panel">
-            {/* ── Header ─────────────────────────────────────────────── */}
-            <div className="header">
-                <h2 className="header-title">
-                    {currentPdfId && files.has(currentPdfId)
-                        ? files.get(currentPdfId).name
-                        : "Select or upload a PDF"}
-                </h2>
+            <div className="toolbar">
+                {currentFile && (
+                    <div className="toolbar-content">
+                        <span className="current-file-name">{currentFile.name}</span>
+                        <div className="toolbar-actions">
+                            {/* Add any toolbar buttons here if needed */}
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* ── Viewer / States ────────────────────────────────────── */}
-            <div className="viewer-container">
-                {loading.viewer && (
-                    <Overlay error={false}>
-                        <Spinner />
-                        <p className="overlay-text">Loading PDF viewer…</p>
-                    </Overlay>
+            <div className="pdf-viewer">
+                {currentFile ? (
+                    <div ref={viewerRef} className="adobe-viewer-container" />
+                ) : (
+                    <div className="no-pdf-message">
+                        <div className="no-pdf-icon">
+                            <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 className="no-pdf-title">No document selected</h3>
+                        <p className="no-pdf-text">
+                            Upload a PDF file and click on it to view here
+                        </p>
+                    </div>
                 )}
-
-                {errors.viewer && (
-                    <Overlay error={true}>
-                        <h3 className="error-title">Failed to load PDF</h3>
-                        <p className="error-message">{errors.viewer}</p>
-                        <button
-                            className="retry-button"
-                            onClick={() => {
-                                clearError("viewer");
-                                if (currentPdfId && files.has(currentPdfId))
-                                    initViewer(files.get(currentPdfId));
-                            }}
-                        >
-                            Retry
-                        </button>
-                    </Overlay>
-                )}
-
-                {!currentPdfId && !loading.viewer && !errors.viewer && (
-                    <Overlay error={false}>
-                        <p className="overlay-text">No PDF selected</p>
-                    </Overlay>
-                )}
-
-                {/* Adobe viewer container */}
-                <div
-                    id="pdf-viewer-container"
-                    ref={viewerDivRef}
-                    className="pdf-viewer"
-                />
             </div>
         </div>
     );
-}
+};
 
-/* ───────────────────────────  Small Helpers  ─────────────────────────── */
-function Overlay({ children, error }) {
-    return (
-        <div
-            className={`overlay ${error ? "overlay-error" : "overlay-default"}`}
-        >
-            {children}
-        </div>
-    );
-}
-
-function Spinner() {
-    return (
-        <div className="spinner" />
-    );
-}
+export default CenterPanel;
