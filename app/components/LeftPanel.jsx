@@ -44,7 +44,6 @@ const LeftPanel = () => {
 
     // Process selected files
     const handleFiles = (fileList) => {
-        setLoading('files', true);
         clearError('files');
 
         try {
@@ -55,7 +54,6 @@ const LeftPanel = () => {
 
             if (pdfFiles.length === 0) {
                 setError('files', 'Please select PDF files only');
-                setLoading('files', false);
                 return;
             }
 
@@ -63,14 +61,12 @@ const LeftPanel = () => {
                 setError('files', `Only ${pdfFiles.length} PDF files were added out of ${fileList.length} selected`);
             }
 
-            // Add files to state
+            // Add files to state (async handled in addFiles)
             addFiles(pdfFiles);
-            setLoading('files', false);
 
         } catch (error) {
             console.error('Error processing files:', error);
             setError('files', 'Failed to process selected files');
-            setLoading('files', false);
         }
     };
 

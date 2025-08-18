@@ -5,10 +5,11 @@ import { useAppState, useAppActions } from './AppStateContext';
 import './CenterPanel.css';
 
 const CenterPanel = () => {
-    const { files, currentPdfId } = useAppState();
-    const { setSnippets } = useAppActions();
+    const { files, currentPdfId, jumpToPage } = useAppState();
+    const { setSnippets, setJumpToPage } = useAppActions();
     const viewerRef = useRef(null);
     const adobeDCViewRef = useRef(null);
+    const previewPromiseRef = useRef(null);
 
     // Get current file data
     const currentFile = currentPdfId ? files.get(currentPdfId) : null;
@@ -60,7 +61,7 @@ const CenterPanel = () => {
                 });
 
                 // Preview the file
-                const previewFilePromise = adobeDCViewRef.current.previewFile({
+                previewPromiseRef.current = adobeDCViewRef.current.previewFile({
                     content: { location: { url: fileUrl } },
                     metaData: { fileName: currentFile.name }
                 }, {
@@ -74,9 +75,9 @@ const CenterPanel = () => {
                 // Register callback for text selection
                 adobeDCViewRef.current.registerCallback(
                     window.AdobeDC.View.Enum.CallbackType.EVENT_LISTENER,
-                    function(event) {
+                    function (event) {
                         if (event.type === "PREVIEW_SELECTION_END") {
-                            previewFilePromise.then(adobeViewer => {
+                            previewPromiseRef.current.then(adobeViewer => {
                                 adobeViewer.getAPIs().then(apis => {
                                     apis.getSelectedContent()
                                         .then(result => {
@@ -103,9 +104,22 @@ const CenterPanel = () => {
             if (adobeDCViewRef.current && viewerRef.current) {
                 viewerRef.current.innerHTML = '';
                 adobeDCViewRef.current = null;
+                previewPromiseRef.current = null;
             }
         };
     }, [currentFile, currentPdfId, setSnippets]);
+
+    // Handle jump to page when jumpToPage changes
+    useEffect(() => {
+        if (jumpToPage && previewPromiseRef.current) {
+            previewPromiseRef.current.then(adobeViewer => {
+                adobeViewer.getAPIs().then(apis => {
+                    apis.gotoPage(jumpToPage).catch(error => console.error('Error jumping to page:', error));
+                    setJumpToPage(null); // Clear after jump
+                });
+            });
+        }
+    }, [jumpToPage, setJumpToPage]);
 
     return (
         <div className="center-panel">
