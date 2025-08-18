@@ -593,3 +593,9 @@ details[open] summary::before {
 .section-item:hover {
     transform: translateY(-1px);
 }
+
+h2 {
+    font-size: 0.975rem;
+    font-weight: 600;
+    color: #111827;
+}

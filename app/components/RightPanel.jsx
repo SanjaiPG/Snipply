@@ -88,7 +88,7 @@ const RightPanel = () => {
         <div className="right-panel">
             {/* Selected Text Section */}
             <div className="section">
-                <h3>Selected Text</h3>
+                <h2>Selected Text</h2>
                 {snippets.length > 0 ? (
                     <div className="selected-text">
                         {snippets.map((snippet, index) => (
@@ -116,7 +116,7 @@ const RightPanel = () => {
 
             {/* Relevant Sections */}
             <div className="section">
-                <h3>Relevant Sections</h3>
+                <h2>Relevant Sections</h2>
                 {loading.sections ? (
                     <div className="spinner-container">
                         <div className="spinner"></div>
@@ -151,7 +151,7 @@ const RightPanel = () => {
             {/* Smart Headings Section - Shows AI-detected with fallback */}
             <div className="headings-section">
                 <div className="section-header">
-                    <h3>Document Headings</h3>
+                    <h2>Document Headings</h2>
                     {errors.headings && (
                         <button
                             onClick={handleRetryHeadingExtraction}
@@ -278,7 +278,11 @@ const RightPanel = () => {
 
             {/* Insights Section */}
             <div className="section">
-                <h3>Insights</h3>
+                <h2 style={{
+                    fontSize: "0.975rem",
+                    fontWeight: 600,
+                    color: "#111827"
+                }}>Insights</h2>
                 {loading.insights ? (
                     <div className="spinner-container">
                         <div className="spinner"></div>
@@ -307,7 +311,11 @@ const RightPanel = () => {
 
             {/* Podcast Section */}
             <div className="section">
-                <h3>Podcast</h3>
+                <h2 style={{
+                    fontSize: "0.975rem",
+                    fontWeight: 600,
+                    color: "#111827"
+                }}>Podcast</h2>
                 {loading.audio ? (
                     <div className="spinner-container">
                         <div className="spinner"></div>
@@ -341,7 +349,7 @@ const RightPanel = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 
