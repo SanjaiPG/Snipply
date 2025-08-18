@@ -94,7 +94,7 @@ const RightPanel = () => {
                         {snippets.map((snippet, index) => (
                             <div key={index} className="snippet">
                                 <div className="snippet-text">{snippet}</div>
-                                <div className="snippet-actions">
+                                {/* <div className="snippet-actions">
                                     <button
                                         onClick={() => navigator.clipboard.writeText(snippet)}
                                         className="snippet-action-button"
@@ -102,7 +102,7 @@ const RightPanel = () => {
                                     >
                                         📋
                                     </button>
-                                </div>
+                                </div> */}
                             </div>
                         ))}
                     </div>
@@ -129,14 +129,14 @@ const RightPanel = () => {
                         {relevantSections.map((section, index) => (
                             <li
                                 key={index}
-                                onClick={() => handleSectionClick(section)}
+                                // onClick={() => handleSectionClick(section)}
                                 className="section-item"
                             >
                                 <div className="section-content">
                                     <div className="section-title">{section.title}</div>
-                                    <div className="section-page">Page {section.page}</div>
+                                    <div className="section-page">{section.pdfId}</div>
                                 </div>
-                                <div className="section-arrow">→</div>
+                                <div className="section-arrow"></div>
                             </li>
                         ))}
                     </ul>
@@ -181,14 +181,14 @@ const RightPanel = () => {
                             const displayData = getHeadingsForDisplay(file);
                             return (
                                 <div key={file.id} className="file-headings-group">
-                                    <details open>
+                                    <details closed>
                                         <summary className="file-summary">
                                             <div className="file-info">
                                                 <span className="file-name">{file.name}</span>
                                                 <div className="file-meta">
-                                                    <span className={`source-badge ${displayData.source === 'AI-Detected' ? 'ai' : 'structure'}`}>
+                                                    {/* <span className={`source-badge ${displayData.source === 'AI-Detected' ? 'ai' : 'structure'}`}>
                                                         {displayData.source}
-                                                    </span>
+                                                    </span> */}
                                                     <span className="heading-count">
                                                         {displayData.count} headings
                                                     </span>
@@ -202,7 +202,7 @@ const RightPanel = () => {
                                                         key={index}
                                                         className={`heading-item ${heading.level.toLowerCase()} ${currentPdfId === file.id ? 'current-file' : ''
                                                             }`}
-                                                        onClick={() => handleHeadingClick(file.id, heading.page)}
+                                                    // onClick={() => handleHeadingClick(file.id, heading.page)}
                                                     >
                                                         <div className="heading-level">{heading.level}</div>
                                                         <div className="heading-content">
