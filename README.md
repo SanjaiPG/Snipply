@@ -50,6 +50,10 @@ There are two ways to run this application: using Docker or with npm.
 ```bash
 docker build -t adobe-hackathon-app .
 ```
+
+#### Add Your API Keys
+Before running the Docker container, make sure to replace all placeholder values (<your-...-here>) with your actual API keys and endpoints.
+
 #### To Run in linux distro
 ```bash
 docker run \
