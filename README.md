@@ -28,11 +28,18 @@ Follow these steps to install the required dependencies for the project.
 
 ### Install additional required packages:
 You will need to install specific packages for certain functionalities:
-bash
+```bash
 npm install @google/generative-ai
+```
+```bash
 npm install microsoft-cognitiveservices-speech-sdk
+```
+```bash
 npm install pdfjs-dist
+```
+```
 npm install cross-env --save-dev
+```
 
 ## Running the Application
 
@@ -43,8 +50,9 @@ There are two ways to run this application: using Docker or with npm.
 ### 2. Running with npm (npm run dev)
 
 ## To make an .env file
-bash
+```bash
 cp .env.example .env
+```
 
 ## Configuration
 
@@ -56,7 +64,8 @@ Once you have the .env file set up, make sure to populate it with the required A
 
 *Start the application:*
 After installing dependencies, you can start the application with:
-bash
+```bash
 npm run dev
+```
 
 This will run the application inside the Docker container and expose it on port 8080
