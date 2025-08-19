@@ -622,7 +622,11 @@ If no clear headings are found, return an empty array: []
             const text = state.snippets[0];
             const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const result = await model.generateContent(`Provide 2-3 sentence insights on this text: ${text}`);
+            const result = await model.generateContent(`give me:
+                One key insight in a single sentence.
+                One 'Did you know?' fact in a single sentence.
+                One contradiction or counterpoint in a single sentence.
+                One inspiration or connection : for this ${text}`);
             dispatch({ type: ActionTypes.SET_INSIGHTS, payload: result.response.text() });
         } catch (error) {
             dispatch({ type: ActionTypes.SET_ERROR, payload: { key: 'insights', value: error.message } });
