@@ -72,7 +72,7 @@ docker run \
 
 #### To Run in windows
 ```bash
-docker run \
+docker run ^
    -e GOOGLE_API_KEY=<your-google-api-key-here> ^
    -e AZURE_TTS_KEY=<your-azure-tts-key-here> ^
    -e AZURE_TTS_ENDPOINT=https://eastus.api.cognitive.microsoft.com/ ^
