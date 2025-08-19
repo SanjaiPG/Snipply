@@ -48,7 +48,7 @@ There are two ways to run this application: using Docker or with npm.
 ### 1. Running with Docker
 #### Build Docker
 ```bash
-docker build -t adobe-hackathon-app .
+docker build -t adobe-hackathon-finale .
 ```
 
 #### Add Your API Keys
