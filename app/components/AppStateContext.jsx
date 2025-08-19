@@ -621,7 +621,7 @@ If no clear headings are found, return an empty array: []
         try {
             const text = state.snippets[0];
             const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const result = await model.generateContent(`give me:
                 One key insight in a single sentence.
                 One 'Did you know?' fact in a single sentence.
@@ -641,7 +641,7 @@ If no clear headings are found, return an empty array: []
         try {
             const text = state.snippets[0];
             const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const result = await model.generateContent(`Create a 2-3 minute podcast script based on this text: ${text}`);
             const script = result.response.text();
 
