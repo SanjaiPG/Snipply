@@ -1,4 +1,4 @@
-### 🚀 Project Overview
+# Project Overview
 
 * *PDF Viewing* → Integrated with *Adobe PDF Embed API* for seamless in-browser PDF viewing and text selection.
 * *Snippet Extraction* → Users can highlight text directly from the PDF, which is then captured for processing.
@@ -26,4 +26,37 @@ Follow these steps to install the required dependencies for the project.
    git clone https://github.com/SanjaiPG/adobe-india-hackathon-2025-finale.git
    ```
 
-2. 
+### Install additional required packages:
+You will need to install specific packages for certain functionalities:
+bash
+npm install @google/generative-ai
+npm install microsoft-cognitiveservices-speech-sdk
+npm install pdfjs-dist
+npm install cross-env --save-dev
+
+## Running the Application
+
+There are two ways to run this application: using Docker or with npm.
+
+### 1. Running with Docker
+
+### 2. Running with npm (npm run dev)
+
+## To make an .env file
+bash
+cp .env.example .env
+
+## Configuration
+
+Once you have the .env file set up, make sure to populate it with the required API keys and credentials:
+
+- *Google Generative AI:* Obtain your API key and configuration details from the [Google Cloud Console](https://console.cloud.google.com/).
+- *Microsoft Cognitive Services Speech SDK:* Get your credentials from the [Azure Portal](https://portal.azure.com/).
+- *PDF.js:* Customize the PDF handling options as required for your project.
+
+*Start the application:*
+After installing dependencies, you can start the application with:
+bash
+npm run dev
+
+This will run the application inside the Docker container and expose it on port 8080
