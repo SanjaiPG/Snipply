@@ -19,7 +19,7 @@ Before you begin, make sure you have the following installed:
 
 # Adobe Embed PDF API Key
    ```bash
-      fb582e05a1a14a678e61cac8e9c0701f
+   fb582e05a1a14a678e61cac8e9c0701f
    ```
 
 ## Installation
