@@ -55,7 +55,7 @@ const CenterPanel = () => {
                 const fileUrl = URL.createObjectURL(currentFile.file);
 
                 // Initialize Adobe DC View
-                const clientId = 'fb582e05a1a14a678e61cac8e9c0701f';
+                const clientId = '1e12d9ac57964521b0cce77076963839';
                 if (!clientId) {
                     console.error("Adobe Embed API Key is missing!");
                     return;
